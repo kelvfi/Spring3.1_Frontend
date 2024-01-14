@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <h1>Student:innenliste</h1>
+        <hr class="border-2  border-top border-info">
+
+        <a href="insertstudent.html" class="btn btn-info" role="button">Student:in hinzufügen</a>
+
+        <hr class="border-2  border-top border-info">
+        <table class="table" id="studentTable"></table>
+    </div>
+
+</body>
+<script>
+    getAllData();
+
+    /**
+     * Hier wird ein API-Join gemacht.
+     * Man greift auf den Backend Server zu um alle Daten zu bekommen.
+     * 
+     * Diese Funktion zeigt alle Daten an.
+     */
+    async function getAllData() {
+        try {
+            const response = await fetch('http://localhost:8080/api/v1/studenten', //fetch() gibt wie bei Postman zurück
+                {
+                    method: 'GET', //Zusatzinformationen
+                    cache: 'no-cache',
+                    header: {
+                        'Accept': 'application/json'
+                    }
+                });
+            const data = await response.json(); //await = wir machen erst weiter sobald das erste erledigt ist usw.
+
+            const table = document.getElementById('studentTable');
+
+            //Löschen der Zeilen
+            while (table.rows[0]) {
+                table.deleteRow(0);
+            }
+
+            //Hinzufügen einer neuen Zeile und Spalten
+            var row = table.insertRow();
+            var id = row.insertCell(0);
+            var name = row.insertCell(1);
+            var plz = row.insertCell(2);
+            var action = row.insertCell(3);
+
+            //Inhalt der Zeile
+            id.innerHTML = 'ID';
+            name.innerHTML = 'Name';
+            plz.innerHTML = 'Postleitzahl';
+            action.innerHTML = '';
+
+            //Aus 'student' haben wir die Daten herausgeholt
+            data.forEach(student => {
+                var row = table.insertRow()
+                var id = row.insertCell(0)
+                var name = row.insertCell(1)
+                var plz = row.insertCell(2)
+                var action = row.insertCell(3)
+
+                id.innerHTML = student.id;
+                name.innerHTML = student.name;
+                plz.innerHTML = student.plz;
+                action.innerHTML = '';
+            });
+            console.log(data)
+
+        //Falls der Server nicht gefunden wurde
+        } catch (exception) {
+            const table = document.getElementById('studentTable')
+            table.innerHTML = "Studentendaten konnten nicht geladen werden."
+        }
+    }
+
+</script>
+
+</html>
