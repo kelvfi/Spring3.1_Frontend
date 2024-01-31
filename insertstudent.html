@@ -16,6 +16,7 @@
         <a href="allstudents.html" class="btn btn-info" role="button">Student:innenliste</a>
         <hr class="border-2  border-top border-info">
 
+        <!-- Formular nimmt die Daten entgegen -->
         <form action="">
             <div class="mb-3">
                 <label for="name" class="form-label">NAME</label>
@@ -30,7 +31,7 @@
             </div>
         </form>
 
-        <button class="btn btn-warning" onklick="sendData()">hinzufügen</button>
+        <button class="btn btn-warning" onclick="sendData()">hinzufügen</button>
     </div>
 
     <script>
@@ -38,8 +39,42 @@
             const plz = $('input[name=plz]').val()
             const name = $('input[name=name]').val()
 
-            console.log(name)
-            console.log("HELLO")
+            try {
+                const response = await fetch('http://localhost:8080/api/v1/studenten', //fetch() gibt wie bei Postman zurück
+                {
+                    method: 'POST', //Zusatzinformationen
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({"name":name,"plz":plz}) //Aus dem Input Feld
+                })
+            const data = await response.json() //Zurückbekommen von den Generierten Studenten
+
+            //Wenn name dann richtig wird es geleert (kein Fehler mehr angezeitgt)
+            $('#nameError').html('')
+            $('#plzError').html('')
+
+            if (data.code && data.code == 9000 && data.formValidationErrors) {
+
+                if (data.formValidationErrors.name) {
+                    $('#nameError').html(data.formValidationErrors.name)
+                }
+
+                if (data.formValidationErrors.plz) {
+                    $('#plzError').html(data.formValidationErrors.plz)
+                }
+
+            } else {
+                $('#name').val('')
+                $('#plz').val('')
+                alert("Student eingefügt!")
+            }
+
+            } catch (exception) { //Netzwerk-Fehler -> siehe fetch() API-Dokumentation
+                alert("Student konnte nicht eingefügt werden!"+exception)
+            }
         }
     </script>
 

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student:innen aktuallisieren</title>
+    <script src="jquery-3.6.3.min.js"></script>
+    <link rel="stylesheet" href="bootstrap.min.css">
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <h1>Student:in aktuallisieren</h1>
+
+        <hr class="border-2  border-top border-info">
+        <a href="allstudents.html" class="btn btn-info" role="button">Student:innenliste</a>
+        <hr class="border-2  border-top border-info">
+
+        <!-- Formular nimmt die Daten entgegen -->
+        <form action="">
+
+            <div class="mb-3">
+                <label for="id" class="form-label fw-semibold">STUDENT-ID</label>
+                <input type="text" class="form-control-plaintext " name="id" id="id" readonly>
+            </div>
+
+            <div class="mb-3">
+                <label for="name" class="form-label">NAME</label>
+                <input type="text" class="form-control" id="name" name="name">
+                <div class="form-text" id="nameError"></div>
+            </div>
+
+            <div class="mb-3">
+                <label for="plz" class="form-label">PLZ</label>
+                <input type="text" class="form-control" id="plz" name="plz">
+                <div class="form-text" id="plzError"></div>
+            </div>
+        </form>
+
+        <button class="btn btn-warning" onclick="sendData()">Änderungen speichern</button>
+    </div>
+
+    <script>
+
+        loadUrlDataToForm()
+
+        //Laden beim Starten diese Daten in das Fomular hinein
+        function loadUrlDataToForm() {
+            const id = getUrlParameter('id')
+            const name = getUrlParameter('name')
+            const plz = getUrlParameter('plz')
+
+            $('#id').val(id)
+            $('#name').val(name)
+            $('#plz').val(plz)
+
+
+        }
+
+        function getUrlParameter(name) {
+            return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search) || [null, ''])[1].replace(/\+/g, '%20')) || null;
+        }
+
+        async function sendData() {
+            const id = $('input[name=id]').val()
+            const plz = $('input[name=plz]').val()
+            const name = $('input[name=name]').val()
+
+            try {
+                const response = await fetch('http://localhost:8080/api/v1/studenten', //fetch() gibt wie bei Postman zurück
+                    {
+                        method: 'PUT', //Zusatzinformationen
+                        cache: 'no-cache',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ "id": id, "name": name, "plz": plz }) //Aus dem Input Feld
+                    })
+                const data = await response.json() //Zurückbekommen von den Generierten Studenten
+
+                //Wenn name dann richtig wird es geleert (kein Fehler mehr angezeitgt)
+                $('#nameError').html('')
+                $('#plzError').html('')
+
+                if (data.code) {
+                    if (data.code && data.code == 9000 && data.formValidationErrors) {
+
+                        if (data.formValidationErrors.name) {
+                            $('#nameError').html(data.formValidationErrors.name)
+                        }
+
+                        if (data.formValidationErrors.plz) {
+                            $('#plzError').html(data.formValidationErrors.plz)
+                        }
+
+                    } else if (data.code = 1000 && data.message) { //Student für aktuallisierung ist nicht bekannt
+                        alert("Student konnte nicht aktualisiert werden: " + data.message)
+
+                    }
+
+                } else {
+                    alert("Student aktuallisiert!")
+                }
+
+            } catch (exception) { //Netzwerk-Fehler -> siehe fetch() API-Dokumentation
+                alert("Student konnte nicht aktuallisiert werden!" + exception)
+            }
+        }
+
+
+    </script>
+
+</body>
+
+</html>

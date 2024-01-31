@@ -36,7 +36,7 @@
                 {
                     method: 'GET', //Zusatzinformationen
                     cache: 'no-cache',
-                    header: {
+                    headers: {
                         'Accept': 'application/json'
                     }
                 });
@@ -73,7 +73,8 @@
                 id.innerHTML = student.id;
                 name.innerHTML = student.name;
                 plz.innerHTML = student.plz;
-                action.innerHTML = `<button type="button" class="btn btn-warning" onclick="deleteStudent(${student.id})">löschen</button>`
+                action.innerHTML = `<a href="updatestudent.html?id=${student.id}&name=${student.name}&plz=${student.plz}" class="btn btn-info" role="button">bearbeiten</a> 
+                                    <button type="button" class="btn btn-warning" onclick="deleteStudent(${student.id})">löschen</button>`
             });
             console.log(data)
 
@@ -91,7 +92,7 @@
                 {
                     method: 'DELETE', //Zusatzinformationen
                     cache: 'no-cache',
-                    header: {
+                    headers: {
                         'Accept': 'application/json'
                     }
                 })
